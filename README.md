@@ -59,8 +59,8 @@ venv\Scripts\activate
 pip install flet matplotlib requests
 ```
 
-**▶️ Running the Application**
-To start the Cry4Help application:
+**▶️ Running the Application
+To start the Cry4Help application:**
 1. Open your terminal or command line.
 2. Navigate to the project directory.
   ```bash
