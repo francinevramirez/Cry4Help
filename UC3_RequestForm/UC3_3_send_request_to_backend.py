@@ -20,6 +20,9 @@ def main(page: ft.Page):
     page.window_height = 600
     page.bgcolor = ft.Colors.GREY_100
 
+    # NEW: Ensure the database table exists when the app starts
+    setup_requests_table()
+
     name = ft.TextField(label="Your Name", width=400)
     title = ft.TextField(label="Request Title", width=400)
     description = ft.TextField(label="Request Description", multiline=True, min_lines=3, max_lines=5, width=400)
@@ -29,8 +32,9 @@ def main(page: ft.Page):
         options=[ft.dropdown.Option(opt) for opt in ['tutoring', 'repair', 'transport', 'tech', 'other']]
     )
     location = ft.TextField(label="Location", width=400)
-    result_output = ft.Text(value="", size=14, color=ft.Colors.RED_600)
+    result_output = ft.Text(value="", size=14, color=ft.colors.RED_600, width=400, text_align=ft.TextAlign.CENTER)
 
+    # MODIFIED: The handle_submit function
     def handle_submit(e):
         errors = validate_request_form(
             name.value,
@@ -41,17 +45,26 @@ def main(page: ft.Page):
         )
 
         if errors:
-            result_output.color = ft.Colors.RED_600
+            result_output.color = ft.colors.RED_600
             result_output.value = "\n".join(["❌ " + err for err in errors])
         else:
-            result_output.color = ft.Colors.GREEN_700
-            result_output.value = send_request(
+            # THIS IS WHERE YOU LOG THE REQUEST
+            # Instead of the simulated send_request, call the database function
+            success, message = log_request_to_db(
                 name.value,
                 title.value,
                 description.value,
                 category.value,
                 location.value
             )
+
+            # Update the UI based on whether the database save was successful
+            if success:
+                result_output.color = ft.colors.GREEN_700
+            else:
+                result_output.color = ft.colors.RED_600
+            
+            result_output.value = message
 
         page.update()
 
@@ -60,7 +73,7 @@ def main(page: ft.Page):
     page.add(
         ft.Column(
             [
-                ft.Text("Cry4Help - Request Form", size=26, weight="bold", color=ft.Colors.BLUE_900),
+                ft.Text("Cry4Help - Request Form", size=26, weight="bold", color=ft.colors.BLUE_900),
                 name,
                 title,
                 description,

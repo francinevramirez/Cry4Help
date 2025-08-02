@@ -2,15 +2,18 @@ import sqlite3
 from datetime import datetime
 import flet as ft
 
+
 def setup_match_history():
     conn = sqlite3.connect("cry4help.db")
     cursor = conn.cursor()
 
     # Force drop existing tables to prevent schema mismatch
+
     cursor.execute("DROP TABLE IF EXISTS match_history")
     cursor.execute("DROP TABLE IF EXISTS help_requests")
 
     # Recreate help_requests with required description field
+
     cursor.execute('''
         CREATE TABLE help_requests (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -19,7 +22,6 @@ def setup_match_history():
             description TEXT NOT NULL
         )
     ''')
-
     cursor.execute('''
         CREATE TABLE match_history (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -32,26 +34,28 @@ def setup_match_history():
     ''')
 
     # Sample help requests with descriptions
+
     sample_requests = [
         ("Rafael", "Math Tutoring", "Needs help with algebra and solving equations."),
         ("Mia", "Computer Repair", "Laptop is not booting up after update.")
     ]
-
     for name, title, desc in sample_requests:
         cursor.execute(
             "INSERT INTO help_requests (requester_name, title, description) VALUES (?, ?, ?)",
             (name, title, desc)
         )
-
     # Fetch request IDs
+
     cursor.execute("SELECT id FROM help_requests")
     request_ids = [row[0] for row in cursor.fetchall()]
 
     # Sample match records
+
     sample_matches = [
         (request_ids[0], "Luke", "fulfilled"),
         (request_ids[1], "Isabel", "in progress")
     ]
+
 
     for req_id, vol, status in sample_matches:
         matched_on = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -59,7 +63,6 @@ def setup_match_history():
             INSERT INTO match_history (request_id, volunteer_name, matched_on, status)
             VALUES (?, ?, ?, ?)
         ''', (req_id, vol, matched_on, status))
-
     conn.commit()
     conn.close()
 
@@ -78,7 +81,9 @@ def retrieve_match_history():
     conn.close()
     return records
 
+
 # Flet App: Match History Viewer
+
 
 def main(page: ft.Page):
     page.title = "Cry4Help - Match History"
@@ -87,14 +92,11 @@ def main(page: ft.Page):
     page.window_height = 500
     page.bgcolor = ft.Colors.GREY_50
 
-    setup_match_history()
-
+    setup_match_history()  
     records = retrieve_match_history()
-
     if not records:
         page.add(ft.Text("No match history found.", color=ft.Colors.RED_600, size=18))
         return
-
     table = ft.DataTable(
         columns=[
             ft.DataColumn(ft.Text("Match ID")),
@@ -115,12 +117,10 @@ def main(page: ft.Page):
             ]) for row in records
         ]
     )
-
     page.add(
         ft.Column([
             ft.Text("📋 Match History", size=26, weight="bold", color=ft.Colors.BLUE_900),
             table
         ])
     )
-
 ft.app(target=main)
